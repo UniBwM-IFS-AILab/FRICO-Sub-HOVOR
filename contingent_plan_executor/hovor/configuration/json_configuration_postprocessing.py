@@ -223,6 +223,10 @@ def map_action_to_outcome_determiner(action):
     if a == "dialogue":
         if st == "Context entity extraction":
             return "context_entity_outcome_determiner"
+        
+        if st == "custom": 
+            return "custom_outcome_determiner"
+
 
         return "disambiguation_outcome_determiner"
 

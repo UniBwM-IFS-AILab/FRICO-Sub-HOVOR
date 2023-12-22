@@ -1,0 +1,289 @@
+{
+    "plan": {
+        "init": "7",
+        "goal": "0",
+        "nodes": {
+            "0": {
+                "expected_successor": false,
+                "action": "---",
+                "state": "0x13184b0",
+                "distance": 0,
+                "is_relevant": 1,
+                "is_goal": 1,
+                "is_sc": 1,
+                "successors": []
+            },
+            "2": {
+                "expected_successor": "1",
+                "action": "dialogue_statement",
+                "state": "0x131e000",
+                "distance": 2,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "dialogue_statement_DETDUP_dialogue_statement__reset-EQ-lock",
+                        "successor_id": "1"
+                    }
+                ]
+            },
+            "1": {
+                "expected_successor": "0",
+                "action": "complete",
+                "state": "0x1321980",
+                "distance": 1,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "complete_DETDUP_complete__finish-EQ-finish",
+                        "successor_id": "0"
+                    }
+                ]
+            },
+            "7": {
+                "expected_successor": "2",
+                "action": "get-initial_help_request",
+                "state": "0x1324790",
+                "distance": 3,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-fallback",
+                        "successor_id": "9"
+                    },
+                    {
+                        "outcome_label": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-electric_fire_emergency",
+                        "successor_id": "2"
+                    },
+                    {
+                        "outcome_label": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-engine_fire_emergency",
+                        "successor_id": "2"
+                    },
+                    {
+                        "outcome_label": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-generic_fire_emergency",
+                        "successor_id": "6"
+                    },
+                    {
+                        "outcome_label": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-no_its_good",
+                        "successor_id": "2"
+                    }
+                ]
+            },
+            "4": {
+                "expected_successor": "2",
+                "action": "get-fire_color_information",
+                "state": "0x13213b0",
+                "distance": 3,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "get-fire_color_information_DETDUP_get-fire_color_information__set-fire_color-EQ-fallback",
+                        "successor_id": "8"
+                    },
+                    {
+                        "outcome_label": "get-fire_color_information_DETDUP_get-fire_color_information__set-fire_color-EQ-update-fire_color",
+                        "successor_id": "2"
+                    }
+                ]
+            },
+            "9": {
+                "expected_successor": "7",
+                "action": "dialogue_statement",
+                "state": "0x1322460",
+                "distance": 4,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "dialogue_statement_DETDUP_dialogue_statement__reset-EQ-lock",
+                        "successor_id": "7"
+                    }
+                ]
+            },
+            "5": {
+                "expected_successor": "4",
+                "action": "get-fire_information",
+                "state": "0x131c320",
+                "distance": 4,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "get-fire_information_DETDUP_get-fire_information__set-emergency_type-EQ-fallback",
+                        "successor_id": "6"
+                    },
+                    {
+                        "outcome_label": "get-fire_information_DETDUP_get-fire_information__set-emergency_type-EQ-update-engine_fire",
+                        "successor_id": "4"
+                    }
+                ]
+            },
+            "6": {
+                "expected_successor": "5",
+                "action": "dialogue_statement",
+                "state": "0x13210d0",
+                "distance": 5,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "dialogue_statement_DETDUP_dialogue_statement__reset-EQ-lock",
+                        "successor_id": "5"
+                    }
+                ]
+            },
+            "8": {
+                "expected_successor": "4",
+                "action": "dialogue_statement",
+                "state": "0x13258f0",
+                "distance": 4,
+                "is_relevant": 0,
+                "is_goal": 0,
+                "is_sc": 1,
+                "successors": [
+                    {
+                        "outcome_label": "dialogue_statement_DETDUP_dialogue_statement__reset-EQ-lock",
+                        "successor_id": "4"
+                    }
+                ]
+            }
+        },
+        "edges": [
+            [
+                "2",
+                ">",
+                "1"
+            ],
+            [
+                "1",
+                ">",
+                "0"
+            ],
+            [
+                "7",
+                ">",
+                "9"
+            ],
+            [
+                "7",
+                ">",
+                "2"
+            ],
+            [
+                "7",
+                ">",
+                "2"
+            ],
+            [
+                "7",
+                ">",
+                "6"
+            ],
+            [
+                "7",
+                ">",
+                "2"
+            ],
+            [
+                "4",
+                ">",
+                "8"
+            ],
+            [
+                "4",
+                ">",
+                "2"
+            ],
+            [
+                "9",
+                ">",
+                "7"
+            ],
+            [
+                "5",
+                ">",
+                "6"
+            ],
+            [
+                "5",
+                ">",
+                "4"
+            ],
+            [
+                "6",
+                ">",
+                "5"
+            ],
+            [
+                "8",
+                ">",
+                "4"
+            ]
+        ],
+        "states": {
+            "0x13184b0": [
+                "Atom goal()"
+            ],
+            "0x131e000": [
+                "Atom force-statement()",
+                "Atom informed()"
+            ],
+            "0x1321980": [
+                "NegatedAtom force-statement()",
+                "Atom informed()"
+            ],
+            "0x1324790": [
+                "NegatedAtom request_emergency_help()",
+                "NegatedAtom know__fire_type()",
+                "NegatedAtom maybe-know__request_emergency_help()",
+                "NegatedAtom know__request_emergency_help()",
+                "NegatedAtom force-statement()"
+            ],
+            "0x13213b0": [
+                "Atom request_emergency_help()",
+                "Atom know__fire_type()",
+                "NegatedAtom maybe-know__request_emergency_help()",
+                "Atom know__request_emergency_help()",
+                "NegatedAtom force-statement()"
+            ],
+            "0x1322460": [
+                "NegatedAtom request_emergency_help()",
+                "NegatedAtom know__fire_type()",
+                "NegatedAtom maybe-know__request_emergency_help()",
+                "NegatedAtom know__request_emergency_help()",
+                "Atom force-statement()"
+            ],
+            "0x131c320": [
+                "Atom request_emergency_help()",
+                "NegatedAtom know__fire_type()",
+                "Atom maybe-know__request_emergency_help()",
+                "NegatedAtom know__request_emergency_help()",
+                "NegatedAtom force-statement()"
+            ],
+            "0x13210d0": [
+                "Atom request_emergency_help()",
+                "NegatedAtom know__fire_type()",
+                "Atom maybe-know__request_emergency_help()",
+                "NegatedAtom know__request_emergency_help()",
+                "Atom force-statement()"
+            ],
+            "0x13258f0": [
+                "Atom request_emergency_help()",
+                "Atom know__fire_type()",
+                "NegatedAtom maybe-know__request_emergency_help()",
+                "Atom know__request_emergency_help()",
+                "Atom force-statement()"
+            ]
+        }
+    }
+}

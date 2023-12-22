@@ -1,0 +1,129 @@
+{
+    "actions": {
+        "get-initial_help_request": {
+            "condition": [
+                "(not (know__request_emergency_help))",
+                "(not (maybe-know__request_emergency_help))",
+                "(not (force-statement))",
+                "(not (request_emergency_help))"
+            ],
+            "effect": {
+                "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-generic_fire_emergency": [
+                    "(maybe-know__request_emergency_help)",
+                    "(request_emergency_help)",
+                    "(force-statement)"
+                ],
+                "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-engine_fire_emergency": [
+                    "(request_engine_fire_help)",
+                    "(know__request_engine_fire_help)",
+                    "(informed)",
+                    "(know__request_emergency_help)",
+                    "(force-statement)"
+                ],
+                "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-electric_fire_emergency": [
+                    "(know__request_electric_fire_help)",
+                    "(request_electric_fire_help)",
+                    "(informed)",
+                    "(know__request_emergency_help)",
+                    "(force-statement)"
+                ],
+                "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-no_its_good": [
+                    "(informed)",
+                    "(know__request_emergency_help)",
+                    "(force-statement)"
+                ],
+                "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-fallback": [
+                    "(force-statement)"
+                ]
+            }
+        },
+        "get-fire_information": {
+            "condition": [
+                "(request_emergency_help)",
+                "(not (know__fire_type))",
+                "(not (maybe-know__fire_type))",
+                "(not (know__request_emergency_help))",
+                "(not (force-statement))",
+                "(maybe-know__request_emergency_help)"
+            ],
+            "effect": {
+                "get-fire_information_DETDUP_get-fire_information__set-emergency_type-EQ-update-engine_fire": [
+                    "(know__fire_type)",
+                    "(not (maybe-know__request_emergency_help))",
+                    "(know__request_emergency_help)"
+                ],
+                "get-fire_information_DETDUP_get-fire_information__set-emergency_type-EQ-fallback": [
+                    "(force-statement)"
+                ]
+            }
+        },
+        "get-fire_color_information": {
+            "condition": [
+                "(request_emergency_help)",
+                "(know__fire_type)",
+                "(not (maybe-know__fire_type))",
+                "(not (maybe-know__request_emergency_help))",
+                "(know__request_emergency_help)",
+                "(not (force-statement))"
+            ],
+            "effect": {
+                "get-fire_color_information_DETDUP_get-fire_color_information__set-fire_color-EQ-update-fire_color": [
+                    "(informed)",
+                    "(know__fire_color)",
+                    "(force-statement)"
+                ],
+                "get-fire_color_information_DETDUP_get-fire_color_information__set-fire_color-EQ-fallback": [
+                    "(force-statement)"
+                ]
+            }
+        },
+        "complete": {
+            "condition": [
+                "(informed)",
+                "(not (force-statement))"
+            ],
+            "effect": {
+                "complete_DETDUP_complete__finish-EQ-finish": [
+                    "(goal)"
+                ]
+            }
+        },
+        "dialogue_statement": {
+            "condition": [
+                "(force-statement)"
+            ],
+            "effect": {
+                "dialogue_statement_DETDUP_dialogue_statement__reset-EQ-lock": [
+                    "(not (force-statement))"
+                ]
+            }
+        }
+    },
+    "initial_state": [
+        "(not (know__instrument_fire_enum))",
+        "(not (maybe-know__instrument_fire_enum))",
+        "(not (know__electrical_fire))",
+        "(not (know__fire_type))",
+        "(not (request_emergency_help))",
+        "(not (goal))",
+        "(not (maybe-know__fire_type))",
+        "(not (informed))",
+        "(not (request_engine_fire_help))",
+        "(not (know__fire_color))",
+        "(not (know__goal))",
+        "(not (know__request_emergency_help))",
+        "(not (maybe-know__request_emergency_help))",
+        "(not (know__request_engine_fire_help))",
+        "(not (know__request_electric_fire_help))",
+        "(not (force-statement))",
+        "(not (electrical_fire))",
+        "(not (request_electric_fire_help))"
+    ],
+    "partial": {
+        "get-initial_help_request": [],
+        "get-fire_information": [],
+        "get-fire_color_information": [],
+        "complete": [],
+        "dialogue_statement": []
+    }
+}

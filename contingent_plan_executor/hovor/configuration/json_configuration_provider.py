@@ -10,6 +10,7 @@ from hovor.outcome_determiners.outcome_determination_info import OutcomeDetermin
 from hovor.outcome_determiners.random_outcome_determiner import RandomOutcomeDeterminer
 from hovor.outcome_determiners.rasa_outcome_determiner import RasaOutcomeDeterminer
 from hovor.outcome_determiners.web_call_outcome_determiner import WebCallOutcomeDeterminer
+from hovor.outcome_determiners.custom_outcome_determiner import CustomeOutcomeDeterminer
 from hovor.planning import controller
 from hovor.planning.controller.edge import ControllerEdge
 from hovor.planning.controller.node import ControllerNode
@@ -232,6 +233,9 @@ class JsonConfigurationProvider(ConfigurationProviderBase):
 
         if outcome_determiner_name == "web_call_outcome_determiner":
             return WebCallOutcomeDeterminer()
+        
+        if outcome_determiner_name == "custom_outcome_determiner": 
+            return CustomeOutcomeDeterminer()
 
         print(f"WARNING: {outcome_determiner_name} fallbacked to random outcome determination")
         return RandomOutcomeDeterminer()

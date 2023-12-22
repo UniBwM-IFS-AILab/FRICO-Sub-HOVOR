@@ -2,7 +2,7 @@ from hovor import setupapp
 from hovor.session.database_session import DatabaseSession
 from hovor.core import initialize_session
 from hovor.configuration.direct_json_configuration_provider import DirectJsonConfigurationProvider
-from hovor.execution_monitor import EM
+from hovor.execution_monitor import EM, compute_diagnostic, progress_with_outcome, run_outcome_determination
 from environment import initialize_remote_environment
 from local_run_utils import run_rasa_model_server
 from flask import request, jsonify
@@ -11,6 +11,7 @@ import traceback
 import os
 import sqlalchemy
 import random
+from hovor.runtime.outcome_determination_progress import OutcomeDeterminationProgress
 
 initialize_remote_environment()
 app, db = setupapp()
@@ -291,6 +292,145 @@ def new_message():
         return jsonify({'status': 'error',
                         'msg': "Received unknown action type of %s" % last_execution_result.get_field('type'),
                         'debug': last_execution_result.json})
+
+@app.route('/new-system-event', methods=['POST'])
+def new_system_event():
+    try:
+        # We assume that we only have one trace per user
+        input_data = request.get_json()
+        field_name = input_data["field_name"]
+        field_value = input_data["field_value"]
+        trace_id = input_data["user_id"]
+
+        with open("out_path.txt", "r") as f:
+            out_path = f.readlines()[0]
+            plan_json_config = json.load(open(f"{out_path}/data.json", "r"))
+            hovor_config = json.load(open(f"{out_path}/data.prp.json", "r"))
+            plan_id = plan_json_config['name']
+        
+        plan_config = DirectJsonConfigurationProvider(plan_id,
+                                                      plan_json_config,
+                                                      hovor_config['plan'])
+
+        plan_config.check_all_action_builders()
+
+        print("Plan fetched.")
+        # Only proceed if the trace exists
+        if not check_db(trace_id):
+            return jsonify({'status': 'error', 'msg': "The given user ID does not exist."})
+
+
+        # Load up the existing session
+        session = DatabaseSession(db, trace_id, plan_config)
+        action = session.current_action
+        result = session.current_action_result
+        previous_action = action.name
+        
+        
+        is_external_call = False
+        accumulated_messages = None
+        diagnostics = []
+        
+        while not  is_external_call: 
+        
+            final_progress, confidence = run_outcome_determination(session,result )
+            
+            diagnostics.append(compute_diagnostic(final_progress, session.current_action,result))
+            final_progress.actual_context.set_field(field_name, field_value) 
+            
+            action = progress_with_outcome(session, final_progress)
+            is_external_call = action.is_external
+
+                # if the outcome is foreordained, execute locally and proceed to the next action
+            if action.is_deterministic() and action.action_type != "goal_achieved":
+                is_external_call = False
+
+            if is_external_call:
+                break
+            else:
+                action_execution_result = action.execute()
+                if action_execution_result.get_field('type') == 'message':
+                    if accumulated_messages is None:
+                        accumulated_messages = action_execution_result.get_field('msg')
+                    else:
+                        accumulated_messages = accumulated_messages + '\n' + action_execution_result.get_field('msg')
+    
+        action = session.current_action
+
+        final_outcome_name = final_progress.final_outcome_name
+
+        action.start_execution()
+        
+        
+        if (action is None) or (action.action_type == "goal_achieved"):
+            # If the goal is achieved, then we kill the session (so a new one can begin)
+            # NOTE: do we want to do this?
+            db.session.delete(check_db(trace_id))
+            db.session.commit()
+            if accumulated_messages is None:
+                return jsonify({'status': 'Plan complete!',
+                                'action_name': previous_action,
+                                'outcome_name': final_outcome_name,
+                                'confidence': confidence,
+                                'stickiness': 0})
+            else:
+                # NOTE: cannot json dumps the diagnostics because they have sets in them.
+                with open("diagnostics.txt","w") as f:
+                    f.write(str(diagnostics))
+                return jsonify({'status': "Plan complete!",
+                                'action_name': previous_action,
+                                'outcome_name': final_outcome_name,
+                                'confidence': confidence,
+                                'stickiness': 0,
+                                'msg': accuHovorMsgs(accumulated_messages),
+                                })
+
+        last_execution_result = action.start_execution()
+
+        if accumulated_messages is not None:
+            msg = last_execution_result.get_field('msg')
+            if msg is None:
+                last_execution_result.set_field('msg', accumulated_messages)
+            else:
+                last_execution_result.set_field('msg', accumulated_messages + '\n' + msg)
+
+        session.update_action_result(last_execution_result)
+
+        # Update the trace state in the database
+        session.save(db, trace_id)
+
+    except Exception as e:
+        debug_str = ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
+        print(debug_str)
+        return jsonify({'status': 'error', 'msg': "New message failed: %s" % str(e), 'debug': debug_str})
+
+    if last_execution_result is None:
+        print("No execution result to return.")
+        return jsonify({'status': 'success',
+                        'action_name': previous_action,
+                        'outcome_name': final_outcome_name,
+                        'confidence': confidence,
+                        'stickiness': 1, 'msg': 'All set!'})
+    if last_execution_result.get_field('type') == 'message':
+        print("Returning message: %s" % last_execution_result.get_field('msg'))
+        # NOTE: cannot json dumps the diagnostics because they have sets in them.
+        with open("diagnostics.txt","w") as f:
+            f.write(str(diagnostics))
+        return jsonify({'status': 'success',
+                        'action_name': previous_action,
+                        'outcome_name': final_outcome_name,
+                        'confidence': confidence,
+                        'stickiness': 1,
+                        'msg': accuHovorMsgs(last_execution_result.get_field('msg')),
+                        }
+                    )
+    else:
+        print("Not sure what to do with action of type %s\n%s" % (last_execution_result.get_field('type'),
+                                                                    str(last_execution_result)))
+        return jsonify({'status': 'error',
+                        'msg': "Received unknown action type of %s" % last_execution_result.get_field('type'),
+                        'debug': last_execution_result.json})
+        
 
 # entrypoint to execution monitor.
 @app.route('/load-conversation', methods=['POST'])

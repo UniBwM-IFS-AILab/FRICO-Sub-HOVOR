@@ -22,6 +22,11 @@ class LocalDialogueAction(ActionBase):
         print(self._utterance)
 
     def _end_execution_callback(self, action_result, info):
+        
+        # if self.config['subtype'] == "custom": 
+        #     pass
+        # elif
+        
         if self.action_type == "dialogue":
             LocalDialogueAction._apply_message_grouping = False
             user_input = input("USER: ")

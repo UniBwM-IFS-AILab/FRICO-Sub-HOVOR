@@ -1,0 +1,623 @@
+{
+    "name": "frico_fire",
+    "context_variables": {
+        "request_emergency_help": {
+            "type": "flag",
+            "config": false,
+            "known": {
+                "type": "fflag",
+                "init": false
+            }
+        },
+        "fire_type": {
+            "type": "enum",
+            "config": [
+                "engine fire",
+                "electric fire"
+            ],
+            "known": {
+                "type": "fflag",
+                "init": false
+            }
+        },
+        "request_engine_fire_help": {
+            "type": "flag",
+            "config": false,
+            "known": {
+                "type": "flag",
+                "init": false
+            }
+        },
+        "request_electric_fire_help": {
+            "type": "flag",
+            "config": false,
+            "known": {
+                "type": "flag",
+                "init": false
+            }
+        },
+        "informed": {
+            "type": "flag",
+            "config": false
+        },
+        "instrument_fire_enum": {
+            "type": "enum",
+            "config": [
+                "Radio",
+                "Screen"
+            ],
+            "known": {
+                "type": "fflag",
+                "init": false
+            }
+        },
+        "electrical_fire": {
+            "type": "flag",
+            "config": false,
+            "known": {
+                "type": "flag",
+                "init": false
+            }
+        },
+        "fire_color": {
+            "type": "enum",
+            "config": [
+                "red",
+                "orange"
+            ],
+            "known": {
+                "type": "flag",
+                "init": false
+            }
+        },
+        "goal": {
+            "type": "flag",
+            "config": false,
+            "known": {
+                "type": "flag",
+                "init": false
+            }
+        },
+        "force-statement": {
+            "type": "flag",
+            "config": false
+        }
+    },
+    "intents": {
+        "confirm": {
+            "entities": [],
+            "utterances": [
+                "yes",
+                "yeah"
+            ],
+            "type": "regular"
+        },
+        "deny": {
+            "entities": [],
+            "utterances": [
+                "no",
+                "nah"
+            ],
+            "type": "regular"
+        },
+        "share-generic_fire_emergency": {
+            "entities": [],
+            "utterances": [
+                "The plane is on fire.",
+                "I see smoke",
+                "I can smell smoke"
+            ],
+            "type": "regular"
+        },
+        "share-engine_fire_emergency": {
+            "entities": [],
+            "utterances": [
+                "I see smokes coming out of my engine.",
+                "My engine is burning.",
+                "I see fire coming from my engine."
+            ],
+            "type": "regular"
+        },
+        "share-electric_fire_emergency": {
+            "entities": [
+                "$instrument_fire_enum"
+            ],
+            "utterances": [
+                "My $instrument is catching electric fire",
+                "Help me god, my $instrument is burning"
+            ],
+            "type": "regular"
+        },
+        "share-engine_fire_with_color": {
+            "entities": [
+                "$fire_color"
+            ],
+            "utterances": [
+                "A $fire_color fire is burning in the engine",
+                "I can see a $fire_color colored fire"
+            ],
+            "type": "regular"
+        },
+        "share-fire_type": {
+            "entities": [
+                "$fire_type"
+            ],
+            "utterances": [
+                "I have $fire_type",
+                "$fire_type"
+            ],
+            "type": "regular"
+        },
+        "share-all_good": {
+            "entities": [],
+            "utterances": [
+                "Nah its all good",
+                "Not today Satan",
+                "Nein"
+            ],
+            "type": "regular"
+        },
+        "fallback": {
+            "entities": [],
+            "utterances": [],
+            "type": "fallback"
+        },
+        "utter_msg": {
+            "entities": [],
+            "utterances": [],
+            "type": "regular"
+        }
+    },
+    "actions": {
+        "get-initial_help_request": {
+            "type": "dialogue",
+            "message_variants": [
+                "What can I help you with today?"
+            ],
+            "fallback_message_variants": [
+                "Can you please repeat that?"
+            ],
+            "condition": [
+                [
+                    "request_emergency_help",
+                    "Unknown"
+                ],
+                [
+                    "request_emergency_help",
+                    false
+                ],
+                [
+                    "force-statement",
+                    false
+                ]
+            ],
+            "effect": {
+                "global-outcome-name": "get-initial_help_request__set-emergency_help_type",
+                "type": "oneof",
+                "outcomes": [
+                    {
+                        "updates": {
+                            "request_emergency_help": {
+                                "value": true,
+                                "variable": "request_emergency_help",
+                                "certainty": "Uncertain",
+                                "interpretation": "json"
+                            },
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "share-generic_fire_emergency",
+                        "response_variants": [
+                            "I am here to assist you. Please provide me with further information"
+                        ],
+                        "name": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-generic_fire_emergency",
+                        "assignments": {
+                            "$request_emergency_help": "maybe-found"
+                        }
+                    },
+                    {
+                        "updates": {
+                            "informed": {
+                                "value": true,
+                                "variable": "informed",
+                                "interpretation": "json"
+                            },
+                            "request_engine_fire_help": {
+                                "value": true,
+                                "variable": "request_engine_fire_help",
+                                "certainty": "Known",
+                                "interpretation": "json"
+                            },
+                            "request_emergency_help": {
+                                "variable": "request_emergency_help",
+                                "certainty": "Known",
+                                "value": null,
+                                "interpretation": "json"
+                            },
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "share-engine_fire_emergency",
+                        "response_variants": [
+                            "Good speed captain"
+                        ],
+                        "name": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-engine_fire_emergency",
+                        "assignments": {
+                            "$request_engine_fire_help": "found",
+                            "$request_emergency_help": "found"
+                        }
+                    },
+                    {
+                        "updates": {
+                            "informed": {
+                                "value": true,
+                                "variable": "informed",
+                                "interpretation": "json"
+                            },
+                            "request_electric_fire_help": {
+                                "value": true,
+                                "variable": "request_electric_fire_help",
+                                "certainty": "Known",
+                                "interpretation": "json"
+                            },
+                            "request_emergency_help": {
+                                "variable": "request_emergency_help",
+                                "certainty": "Known",
+                                "value": null,
+                                "interpretation": "json"
+                            },
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "share-electric_fire_emergency",
+                        "response_variants": [
+                            "It was nice knowing you"
+                        ],
+                        "name": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-electric_fire_emergency",
+                        "assignments": {
+                            "$request_electric_fire_help": "found",
+                            "$request_emergency_help": "found"
+                        }
+                    },
+                    {
+                        "updates": {
+                            "informed": {
+                                "value": true,
+                                "variable": "informed",
+                                "interpretation": "json"
+                            },
+                            "request_emergency_help": {
+                                "value": false,
+                                "variable": "request_emergency_help",
+                                "certainty": "Known",
+                                "interpretation": "json"
+                            },
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "deny",
+                        "response_variants": [
+                            "whatever yo"
+                        ],
+                        "name": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-update-no_its_good",
+                        "assignments": {
+                            "$request_emergency_help": "found"
+                        }
+                    },
+                    {
+                        "updates": {
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "fallback",
+                        "name": "get-initial_help_request_DETDUP_get-initial_help_request__set-emergency_help_type-EQ-fallback",
+                        "assignments": {}
+                    }
+                ]
+            },
+            "intents": {
+                "share-generic_fire_emergency": {
+                    "entities": [],
+                    "utterances": [
+                        "The plane is on fire.",
+                        "I see smoke",
+                        "I can smell smoke"
+                    ],
+                    "type": "regular"
+                },
+                "share-engine_fire_emergency": {
+                    "entities": [],
+                    "utterances": [
+                        "I see smokes coming out of my engine.",
+                        "My engine is burning.",
+                        "I see fire coming from my engine."
+                    ],
+                    "type": "regular"
+                },
+                "share-electric_fire_emergency": {
+                    "entities": [
+                        "$instrument_fire_enum"
+                    ],
+                    "utterances": [
+                        "My $instrument is catching electric fire",
+                        "Help me god, my $instrument is burning"
+                    ],
+                    "type": "regular"
+                },
+                "deny": {
+                    "entities": [],
+                    "utterances": [
+                        "no",
+                        "nah"
+                    ],
+                    "type": "regular"
+                },
+                "fallback": {
+                    "entities": [],
+                    "utterances": [],
+                    "type": "fallback"
+                }
+            }
+        },
+        "get-fire_information": {
+            "type": "dialogue",
+            "message_variants": [
+                "What kind of fire is it?"
+            ],
+            "condition": [
+                [
+                    "request_emergency_help",
+                    "Uncertain"
+                ],
+                [
+                    "request_emergency_help",
+                    true
+                ],
+                [
+                    "fire_type",
+                    "Unknown"
+                ],
+                [
+                    "force-statement",
+                    false
+                ]
+            ],
+            "effect": {
+                "global-outcome-name": "get-fire_information__set-emergency_type",
+                "type": "oneof",
+                "outcomes": [
+                    {
+                        "updates": {
+                            "request_emergency_help": {
+                                "variable": "request_emergency_help",
+                                "certainty": "Known",
+                                "value": null,
+                                "interpretation": "json"
+                            },
+                            "fire_type": {
+                                "value": "$fire_type",
+                                "variable": "fire_type",
+                                "certainty": "Known",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "share-fire_type",
+                        "name": "get-fire_information_DETDUP_get-fire_information__set-emergency_type-EQ-update-engine_fire",
+                        "assignments": {
+                            "$request_emergency_help": "found",
+                            "$fire_type": "found"
+                        }
+                    },
+                    {
+                        "updates": {
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "fallback",
+                        "name": "get-fire_information_DETDUP_get-fire_information__set-emergency_type-EQ-fallback",
+                        "assignments": {}
+                    }
+                ]
+            },
+            "fallback_message_variants": [
+                "Sorry, I couldn't understand that input.",
+                "Sorry, I didn't quite get that."
+            ],
+            "intents": {
+                "share-fire_type": {
+                    "entities": [
+                        "$fire_type"
+                    ],
+                    "utterances": [
+                        "I have $fire_type",
+                        "$fire_type"
+                    ],
+                    "type": "regular"
+                },
+                "fallback": {
+                    "entities": [],
+                    "utterances": [],
+                    "type": "fallback"
+                }
+            }
+        },
+        "get-fire_color_information": {
+            "type": "dialogue",
+            "message_variants": [
+                "so your engine is on fire? What color is the fire?"
+            ],
+            "condition": [
+                [
+                    "request_emergency_help",
+                    "Known"
+                ],
+                [
+                    "request_emergency_help",
+                    true
+                ],
+                [
+                    "fire_type",
+                    "Known"
+                ],
+                [
+                    "force-statement",
+                    false
+                ]
+            ],
+            "effect": {
+                "global-outcome-name": "get-fire_color_information__set-fire_color",
+                "type": "oneof",
+                "outcomes": [
+                    {
+                        "updates": {
+                            "informed": {
+                                "value": true,
+                                "variable": "informed",
+                                "interpretation": "json"
+                            },
+                            "fire_color": {
+                                "value": "$fire_color",
+                                "variable": "fire_color",
+                                "certainty": "Known",
+                                "interpretation": "json"
+                            },
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "share-engine_fire_with_color",
+                        "response_variants": [
+                            "If the fire color is $fire_color you might as well curl up in a ball."
+                        ],
+                        "name": "get-fire_color_information_DETDUP_get-fire_color_information__set-fire_color-EQ-update-fire_color",
+                        "assignments": {
+                            "$fire_color": "found"
+                        }
+                    },
+                    {
+                        "updates": {
+                            "force-statement": {
+                                "value": true,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "fallback",
+                        "name": "get-fire_color_information_DETDUP_get-fire_color_information__set-fire_color-EQ-fallback",
+                        "assignments": {}
+                    }
+                ]
+            },
+            "fallback_message_variants": [
+                "Sorry, I couldn't understand that input.",
+                "Sorry, I didn't quite get that."
+            ],
+            "intents": {
+                "share-engine_fire_with_color": {
+                    "entities": [
+                        "$fire_color"
+                    ],
+                    "utterances": [
+                        "A $fire_color fire is burning in the engine",
+                        "I can see a $fire_color colored fire"
+                    ],
+                    "type": "regular"
+                },
+                "fallback": {
+                    "entities": [],
+                    "utterances": [],
+                    "type": "fallback"
+                }
+            }
+        },
+        "complete": {
+            "type": "system",
+            "condition": [
+                [
+                    "informed",
+                    true
+                ],
+                [
+                    "force-statement",
+                    false
+                ]
+            ],
+            "effect": {
+                "global-outcome-name": "complete__finish",
+                "type": "oneof",
+                "outcomes": [
+                    {
+                        "updates": {
+                            "goal": {
+                                "value": true,
+                                "variable": "goal",
+                                "interpretation": "json"
+                            }
+                        },
+                        "name": "complete_DETDUP_complete__finish-EQ-finish",
+                        "intent": null,
+                        "assignments": {}
+                    }
+                ]
+            }
+        },
+        "dialogue_statement": {
+            "type": "dialogue",
+            "condition": [
+                [
+                    "force-statement",
+                    true
+                ]
+            ],
+            "effect": {
+                "global-outcome-name": "dialogue_statement__reset",
+                "type": "oneof",
+                "outcomes": [
+                    {
+                        "updates": {
+                            "force-statement": {
+                                "value": false,
+                                "variable": "force-statement",
+                                "interpretation": "json"
+                            }
+                        },
+                        "intent": "utter_msg",
+                        "name": "dialogue_statement_DETDUP_dialogue_statement__reset-EQ-lock",
+                        "assignments": {}
+                    }
+                ]
+            },
+            "message_variants": [
+                ""
+            ],
+            "disable-fallback": true,
+            "intents": {
+                "utter_msg": {
+                    "entities": [],
+                    "utterances": [],
+                    "type": "regular"
+                }
+            }
+        }
+    }
+}

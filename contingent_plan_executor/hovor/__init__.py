@@ -27,12 +27,17 @@ def setupapp():
     if len(sys.argv) > 1:
         output_files_path = sys.argv[1]
     else:
-        raise ValueError(
-            "Please provide the directory to your plan4dial output files as a system argument."
-        )
+        pass
+        # raise ValueError(
+        #     "Please provide the directory to your plan4dial output files as a system argument."
+        # )
         # output_files_path = "local_data/updated_gold_standard_bot" # ONLY for local debugging
 
     # save the output files path name
+    # output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/gold_standard_bot/output_files"
+
+    #output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/forward_bot/output_files"
+    output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/forward_new/output_files"
     with open("out_path.txt", "w") as f:
         f.write(output_files_path)
 

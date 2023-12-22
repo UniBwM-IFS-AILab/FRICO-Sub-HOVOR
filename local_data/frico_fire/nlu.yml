@@ -1,0 +1,48 @@
+nlu:
+- examples: '- yes
+
+    - yeah'
+  intent: confirm
+- examples: '- no
+
+    - nah'
+  intent: deny
+- examples: '- The plane is on fire.
+
+    - I see smoke
+
+    - I can smell smoke'
+  intent: share-generic_fire_emergency
+- examples: '- I see smokes coming out of my engine.
+
+    - My engine is burning.
+
+    - I see fire coming from my engine.'
+  intent: share-engine_fire_emergency
+- examples: '- Help me god, my $instrument is burning
+
+    - My $instrument is catching electric fire'
+  intent: share-electric_fire_emergency
+- examples: '- A [orange]{"entity": "fire_color", "value": "orange"} fire is burning
+    in the engine
+
+    - I can see a [red]{"entity": "fire_color", "value": "red"} colored fire
+
+    - A [red]{"entity": "fire_color", "value": "red"} fire is burning in the engine
+
+    - I can see a [orange]{"entity": "fire_color", "value": "orange"} colored fire'
+  intent: share-engine_fire_with_color
+- examples: '- I have [electric fire]{"entity": "fire_type", "value": "electric fire"}
+
+    - I have [engine fire]{"entity": "fire_type", "value": "engine fire"}
+
+    - [engine fire]{"entity": "fire_type", "value": "engine fire"}
+
+    - [electric fire]{"entity": "fire_type", "value": "electric fire"}'
+  intent: share-fire_type
+- examples: '- Nah its all good
+
+    - Not today Satan
+
+    - Nein'
+  intent: share-all_good
