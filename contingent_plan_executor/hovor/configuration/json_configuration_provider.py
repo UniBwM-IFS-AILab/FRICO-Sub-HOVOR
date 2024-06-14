@@ -1,5 +1,4 @@
 import json
-
 from hovor.actions.action_base import ActionBase
 from hovor.configuration.configuration_provider_base import ConfigurationProviderBase
 from hovor.configuration.json_configuration_postprocessing import hovor_config_postprocess
@@ -11,6 +10,8 @@ from hovor.outcome_determiners.random_outcome_determiner import RandomOutcomeDet
 from hovor.outcome_determiners.rasa_outcome_determiner import RasaOutcomeDeterminer
 from hovor.outcome_determiners.web_call_outcome_determiner import WebCallOutcomeDeterminer
 from hovor.outcome_determiners.custom_outcome_determiner import CustomeOutcomeDeterminer
+from hovor.outcome_determiners.api_outcome_determiner import ApiOutcomeDeterminer
+from hovor.outcome_determiners.rasa_outcome_determiner_with_reset import RasaOutcomeDeterminerWithReset
 from hovor.planning import controller
 from hovor.planning.controller.edge import ControllerEdge
 from hovor.planning.controller.node import ControllerNode
@@ -147,7 +148,9 @@ class JsonConfigurationProvider(ConfigurationProviderBase):
         successors = self._plan_data["nodes"][node.node_id]["successors"]
         used_names = set()
         for successor in successors:
+            print(successor)
             successor_id = self._sanitize_node_id(successor["successor_id"])
+            
             outcome_node = node_id_to_node[successor_id]
             outcome_name = successor["outcome_label"]
 
@@ -236,6 +239,12 @@ class JsonConfigurationProvider(ConfigurationProviderBase):
         
         if outcome_determiner_name == "custom_outcome_determiner": 
             return CustomeOutcomeDeterminer()
+        
+        if outcome_determiner_name == "api_outcome_determiner": 
+            return ApiOutcomeDeterminer()
+        
+        if outcome_determiner_name == "rasa_outcome_determiner_with_reset": 
+            return RasaOutcomeDeterminerWithReset(action_name, outcome_config["outcomes"], self._configuration_data["context_variables"], self._configuration_data["intents"])
 
         print(f"WARNING: {outcome_determiner_name} fallbacked to random outcome determination")
         return RandomOutcomeDeterminer()

@@ -37,7 +37,7 @@ def setupapp():
     # output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/gold_standard_bot/output_files"
 
     #output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/forward_bot/output_files"
-    output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/forward_new/output_files"
+    output_files_path = "/home/qnc/Plan4Dial/plan4dial/plan4dial/local_data/conversation_alignment_bots/ijcai_bot/output_files"
     with open("out_path.txt", "w") as f:
         f.write(output_files_path)
 

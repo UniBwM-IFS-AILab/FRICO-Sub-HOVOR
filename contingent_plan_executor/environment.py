@@ -5,6 +5,7 @@ from hovor.actions.local_dialogue_action_simulated import LocalDialogueActionSim
 from hovor.actions.local_info_action import LocalInfoAction
 from hovor.actions.dialogue_action import DialogueAction
 from hovor.actions.web_action import WebAction
+from hovor.actions.web_plans_action import WebPlansAction
 
 
 def initialize_local_environment():
@@ -14,6 +15,7 @@ def initialize_local_environment():
     ActionBase.register_action("api", WebAction)
     ActionBase.register_action("goal_achieved", GoalAchievedAction)
     ActionBase.register_action("web", LocalInfoAction)
+    ActionBase.register_action("web_plan", WebPlansAction)
 
 def initialize_local_environment_simulated():
     ActionBase.register_action("dialogue", LocalDialogueActionSimulated)
@@ -22,7 +24,7 @@ def initialize_local_environment_simulated():
     ActionBase.register_action("api", WebAction)
     ActionBase.register_action("goal_achieved", GoalAchievedAction)
     ActionBase.register_action("web", LocalInfoAction)
-    
+    ActionBase.register_action("web_plan", WebPlansAction) 
 def initialize_remote_environment():
     ActionBase.register_action("dialogue", DialogueAction)
     ActionBase.register_action("message", DialogueAction)
@@ -30,3 +32,4 @@ def initialize_remote_environment():
     ActionBase.register_action("api", WebAction)
     ActionBase.register_action("goal_achieved", GoalAchievedAction)
     ActionBase.register_action("web", LocalInfoAction)
+    ActionBase.register_action("web_plan", WebPlansAction)

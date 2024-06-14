@@ -216,6 +216,10 @@ def map_action_to_outcome_determiner(action):
 
     if a == "system":
         return "default_system_outcome_determiner"
+    
+    if a == "web_plan": 
+        return "api_outcome_determiner"
+        
 
     if a == "api" or a == "goal_achieved":
         return "random_outcome_determiner"
@@ -226,6 +230,9 @@ def map_action_to_outcome_determiner(action):
         
         if st == "custom": 
             return "custom_outcome_determiner"
+        
+        if st == "resetable": 
+            return "rasa_outcome_determiner_with_reset"
 
 
         return "disambiguation_outcome_determiner"

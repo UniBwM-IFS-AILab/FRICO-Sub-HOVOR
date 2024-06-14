@@ -1,0 +1,9 @@
+{
+    "predicates": {
+        "p_isEngineFire":"request_engine_fire_help"
+    },
+    "task_based_goal": {
+        "request_emergency_help": "react_to_engine_fire_in_flight"
+    }, 
+    "object_for_task_based_goals": ["engineFire"]
+}

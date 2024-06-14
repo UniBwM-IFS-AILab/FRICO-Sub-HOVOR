@@ -35,7 +35,7 @@ class Intent:
         return self.confidence > other.confidence
 
 
-class RasaOutcomeDeterminer(OutcomeDeterminerBase):
+class RasaOutcomeDeterminerWithReset(OutcomeDeterminerBase):
     """Determiner"""
 
     def __init__(self, action_name, full_outcomes, context_variables, intents):
@@ -174,11 +174,17 @@ class RasaOutcomeDeterminer(OutcomeDeterminerBase):
     def filter_intents(self, r, outcome_groups):
         # make outcome groups accessible by name
         outcome_groups = {out.name : out for out in outcome_groups}
-        #this works for normal case
-        intents_detected = {ranking["name"]: ranking["confidence"] for ranking in r["intent_ranking"] if ranking["confidence"]> 0.1}
+        intents_detected = {ranking["name"]: ranking["confidence"] for ranking in r["intent_ranking"]}
         intents = []
+        
+
+        
+
+        
         for out, out_cfg in self.full_outcomes.items():
-            # check to make sure this intent was at least DETECTED by rasa
+
+
+        # check to make sure this intent was at least DETECTED by rasa
             if out_cfg["intent"] in intents_detected:
                 if self.intents[out_cfg["intent"]]["entities"]:
                     # we only want to consider assignments that are variables of the intent, as outcomes often
@@ -266,41 +272,65 @@ class RasaOutcomeDeterminer(OutcomeDeterminerBase):
         return self.extract_intents(intents)
 
     def rank_groups(self, outcome_groups, progress):
-        chosen_intent, intents = self.get_raw_rankings(
-            progress.json["action_result"]["fields"]["input"], outcome_groups
+        
+        outcome_group_intents = [x['intent'] for x in  self.full_outcomes.values() if x['intent'] is not None ]
+        r = json.loads(
+            requests.post(
+                "http://localhost:5006/model/parse", json={"text": progress.json["action_result"]["fields"]["input"]}
+            ).text
         )
-        ranked_groups = [
-            (intent.outcome, intent.confidence) for intent in intents
-        ]
-        # entities required by the extracted intent
-        if chosen_intent.entity_reqs:
-            ci_ent_reqs = [er[0] for er in chosen_intent.entity_reqs]
-        # note we shouldn't only add samples for extracted entities; some outcomes don't
-        # extract entities themselves but update the values of existing entities
-        for update_var, update_config in progress.get_description(chosen_intent.outcome.name)["updates"].items():
-            if "value" in update_config:
-                if progress.get_entity_type(update_var) in ["json", "enum"]:
-                    value = update_config["value"]
-                    # if value is not null
-                    if value:
-                        # if the value is a variable (check without the $)
-                        if value[1:] in progress.actual_context.field_names:
-                            value = value[1:]
-                            if progress.actual_context._fields[value]:
-                                value = progress.actual_context._fields[value]
-                            else:
-                                # if it is not part of the progress yet and we just extracted entities,
-                                if chosen_intent.entity_reqs:
-                                    # check if we just extracted it
-                                    if value in ci_ent_reqs:
-                                        value = self.extracted_entities[value]["sample"]
-                                    # otherwise, we tried to assign an entity to a value we don't have yet
-                                    else:
-                                        raise ValueError("Tried to assign an entity to \
-                                                        an unknown variable value.")
-                    progress.add_detected_entity(update_var, value)
-        # DEBUG("\t top random ranking for group '%s'" % (chosen_intent.name))
-        return ranked_groups, progress
+        
+        if r["intent"]["name"] not in outcome_group_intents: 
+            print("x")
+            ranked_groups = []
+            
+            for i, out in enumerate(outcome_groups): 
+                if i == len(outcome_groups)-2: # the last one is for fallback, this means we have to take the second last one
+                    ranked_groups.append((out, 1))
+                else: 
+                    ranked_groups.append((out, 0))
+            ranked_groups.sort(key= lambda x:int(x[1] ), reverse=True)
+            return ranked_groups, progress
+            
+            
+            
+        
+        else: 
+            chosen_intent, intents = self.get_raw_rankings(
+                progress.json["action_result"]["fields"]["input"], outcome_groups
+            )
+            ranked_groups = [
+                (intent.outcome, intent.confidence) for intent in intents
+            ]
+            # entities required by the extracted intent
+            if chosen_intent.entity_reqs:
+                ci_ent_reqs = [er[0] for er in chosen_intent.entity_reqs]
+            # note we shouldn't only add samples for extracted entities; some outcomes don't
+            # extract entities themselves but update the values of existing entities
+            for update_var, update_config in progress.get_description(chosen_intent.outcome.name)["updates"].items():
+                if "value" in update_config:
+                    if progress.get_entity_type(update_var) in ["json", "enum"]:
+                        value = update_config["value"]
+                        # if value is not null
+                        if value:
+                            # if the value is a variable (check without the $)
+                            if value[1:] in progress.actual_context.field_names:
+                                value = value[1:]
+                                if progress.actual_context._fields[value]:
+                                    value = progress.actual_context._fields[value]
+                                else:
+                                    # if it is not part of the progress yet and we just extracted entities,
+                                    if chosen_intent.entity_reqs:
+                                        # check if we just extracted it
+                                        if value in ci_ent_reqs:
+                                            value = self.extracted_entities[value]["sample"]
+                                        # otherwise, we tried to assign an entity to a value we don't have yet
+                                        else:
+                                            raise ValueError("Tried to assign an entity to \
+                                                            an unknown variable value.")
+                        progress.add_detected_entity(update_var, value)
+            # DEBUG("\t top random ranking for group '%s'" % (chosen_intent.name))
+            return ranked_groups, progress
 
     def _make_entity_type_sample(self, entity, entity_type, entity_config, extracted_info):
         entity_value = extracted_info["value"]

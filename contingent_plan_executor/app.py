@@ -16,6 +16,9 @@ from hovor.runtime.outcome_determination_progress import OutcomeDeterminationPro
 initialize_remote_environment()
 app, db = setupapp()
 
+import json 
+from hddl_generator import generate_hddl 
+import subprocess
 
 class ConversationDatabase(db.Model):
     user_id = db.Column(db.String, unique=True, nullable=False, primary_key=True)
@@ -215,6 +218,7 @@ def new_message():
         session = DatabaseSession(db, trace_id, plan_config)
         action = session.current_action
         result = session.current_action_result
+        # msg = " ".join(input['msg'].split)
         action.end_execution(result, input_data['msg'])
 
         # used for d3ba blackbox integration
@@ -229,12 +233,36 @@ def new_message():
             # NOTE: do we want to do this?
             db.session.delete(check_db(trace_id))
             db.session.commit()
+            
+            # with open("/home/qnc/Plan4Dial/contingent-plan-executor/contingent_plan_executor/hddl_generator/mapping.json") as f: 
+            #     hddl_domain = json.load(f)
+            
+
+            # predicates = hddl_domain["predicates"]
+            # ctx = session.get_context_copy()
+            # #arg_dict = {k:ctx.get_field(v) for k,v in predicates.items()}
+            # predicates_to_update_later = ["p_isEngineFire engineFire","p_turn_off_master_switch_only_alt" ]
+            
+            # problem_file = generate_hddl.generate_hddl("engine_fire","airplaneDomain", predicates_to_update_later )
+            # problem_file_path = "/home/qnc/panda-planner/taskModelsIJCAI/temp_problems/temp.hddl"
+            # with open(problem_file_path,"w") as file: 
+            #     file.write(problem_file)
+                
+            # domian_file = "/home/qnc/panda-planner/taskModelsIJCAI/domainfile.hddl"
+            # string = "/home/qnc/panda-planner/plan.sh" +" "+ domian_file+" "+problem_file_path
+            
+            # data = subprocess.run(string, capture_output=True, shell=True)
+            # print(f" The plan is \n {data}")
+                
+            
             if accumulated_messages is None:
                 return jsonify({'status': 'Plan complete!',
                                 'action_name': previous_action,
                                 'outcome_name': final_outcome_name,
                                 'confidence': confidence,
                                 'stickiness': 0})
+                
+            
             else:
                 # NOTE: cannot json dumps the diagnostics because they have sets in them.
                 with open("diagnostics.txt","w") as f:
@@ -260,6 +288,12 @@ def new_message():
 
         # Update the trace state in the database
         session.save(db, trace_id)
+        
+        
+        ## trying to generate the HDDL file from here 
+        
+        
+        
 
     except Exception as e:
         debug_str = ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
@@ -431,6 +465,153 @@ def new_system_event():
                         'msg': "Received unknown action type of %s" % last_execution_result.get_field('type'),
                         'debug': last_execution_result.json})
         
+
+
+@app.route('/set-entities-progress', methods=['POST'])
+def set_entities_event():
+    try:
+        # We assume that we only have one trace per user
+        input_data = request.get_json()
+        field_name = input_data["field_name"]
+        field_value = input_data["field_value"]
+        effect_name = input_data["effect_name"]
+        trace_id = input_data["user_id"]
+
+        with open("out_path.txt", "r") as f:
+            out_path = f.readlines()[0]
+            plan_json_config = json.load(open(f"{out_path}/data.json", "r"))
+            hovor_config = json.load(open(f"{out_path}/data.prp.json", "r"))
+            plan_id = plan_json_config['name']
+        
+        plan_config = DirectJsonConfigurationProvider(plan_id,
+                                                      plan_json_config,
+                                                      hovor_config['plan'])
+
+        plan_config.check_all_action_builders()
+
+        print("Plan fetched.")
+        # Only proceed if the trace exists
+        if not check_db(trace_id):
+            return jsonify({'status': 'error', 'msg': "The given user ID does not exist."})
+
+
+        # Load up the existing session
+        session = DatabaseSession(db, trace_id, plan_config)
+        action = session.current_action
+        result = session.current_action_result
+        previous_action = action.name
+        
+
+        
+          
+        is_external_call = False
+        accumulated_messages = None
+        diagnostics = []
+        
+        while not  is_external_call: 
+        
+            final_progress = OutcomeDeterminationProgress(session,result)
+            confidence = 0.8
+            final_progress.add_detected_entity(field_name, field_value)
+            final_progress.apply_effect(effect_name)
+            
+            action = progress_with_outcome(session, final_progress)
+            is_external_call = action.is_external
+
+                # if the outcome is foreordained, execute locally and proceed to the next action
+            if action.is_deterministic() and action.action_type != "goal_achieved":
+                is_external_call = False
+
+            if is_external_call:
+                break
+            else:
+                action_execution_result = action.execute()
+                if action_execution_result.get_field('type') == 'message':
+                    if accumulated_messages is None:
+                        accumulated_messages = action_execution_result.get_field('msg')
+                    else:
+                        accumulated_messages = accumulated_messages + '\n' + action_execution_result.get_field('msg')
+    
+        action = session.current_action
+
+        final_outcome_name = final_progress.final_outcome_name
+
+        action.start_execution()
+        
+        
+        if (action is None) or (action.action_type == "goal_achieved"):
+            # If the goal is achieved, then we kill the session (so a new one can begin)
+            # NOTE: do we want to do this?
+            db.session.delete(check_db(trace_id))
+            db.session.commit()
+            if accumulated_messages is None:
+                return jsonify({'status': 'Plan complete!',
+                                'action_name': previous_action,
+                                'outcome_name': final_outcome_name,
+                                'confidence': confidence,
+                                'stickiness': 0})
+            else:
+                # NOTE: cannot json dumps the diagnostics because they have sets in them.
+                with open("diagnostics.txt","w") as f:
+                    f.write(str(diagnostics))
+                return jsonify({'status': "Plan complete!",
+                                'action_name': previous_action,
+                                'outcome_name': final_outcome_name,
+                                'confidence': confidence,
+                                'stickiness': 0,
+                                'msg': accuHovorMsgs(accumulated_messages),
+                                })
+
+        last_execution_result = action.start_execution()
+
+        if accumulated_messages is not None:
+            msg = last_execution_result.get_field('msg')
+            if msg is None:
+                last_execution_result.set_field('msg', accumulated_messages)
+            else:
+                last_execution_result.set_field('msg', accumulated_messages + '\n' + msg)
+
+        session.update_action_result(last_execution_result)
+
+        # Update the trace state in the database
+        session.save(db, trace_id)
+
+    except Exception as e:
+        debug_str = ''.join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__))
+        print(debug_str)
+        return jsonify({'status': 'error', 'msg': "New message failed: %s" % str(e), 'debug': debug_str})
+
+    if last_execution_result is None:
+        print("No execution result to return.")
+        return jsonify({'status': 'success',
+                        'action_name': previous_action,
+                        'outcome_name': final_outcome_name,
+                        'confidence': confidence,
+                        'stickiness': 1, 'msg': 'All set!'})
+    if last_execution_result.get_field('type') == 'message':
+        print("Returning message: %s" % last_execution_result.get_field('msg'))
+        # NOTE: cannot json dumps the diagnostics because they have sets in them.
+        with open("diagnostics.txt","w") as f:
+            f.write(str(diagnostics))
+        return jsonify({'status': 'success',
+                        'action_name': previous_action,
+                        'outcome_name': final_outcome_name,
+                        'confidence': confidence,
+                        'stickiness': 1,
+                        'msg': accuHovorMsgs(last_execution_result.get_field('msg')),
+                        }
+                    )
+    else:
+        print("Not sure what to do with action of type %s\n%s" % (last_execution_result.get_field('type'),
+                                                                    str(last_execution_result)))
+        return jsonify({'status': 'error',
+                        'msg': "Received unknown action type of %s" % last_execution_result.get_field('type'),
+                        'debug': last_execution_result.json})
+        
+
+        
+
+
 
 # entrypoint to execution monitor.
 @app.route('/load-conversation', methods=['POST'])
