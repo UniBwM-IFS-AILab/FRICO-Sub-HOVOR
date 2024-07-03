@@ -109,3 +109,13 @@ The best way to apply simulation and evaluation, is to use our user interface. W
 
 # Development
 If you want to make your own outcome determiner, start by looking at the [`DefaultSystemOutcomeDeterminer`](https://github.com/dialogue-planning/contingent-plan-executor/blob/main/contingent_plan_executor/hovor/outcome_determiners/default_system_outcome_determiner.py). You will need to return a list of tuples that each hold an outcome group and a confidence, as well as update the context with updated variable values (if any). Finally, you will need to specify the conditions for your action to run with [this function](https://github.com/dialogue-planning/contingent-plan-executor/blob/c0e6f497948dea46cfcdf6889b3fd3e1d8c55425/contingent_plan_executor/hovor/configuration/json_configuration_postprocessing.py#L207) and [this function](https://github.com/dialogue-planning/contingent-plan-executor/blob/c0e6f497948dea46cfcdf6889b3fd3e1d8c55425/contingent_plan_executor/hovor/configuration/json_configuration_provider.py#L219).
+
+
+# What is different from the main branch: 
+
+
+1. I created a web_plan action type  which has the associated files api_outcome_determiner.py and web_plans_actions 
+
+
+If the api is reachable, we take the first action from the outcome list, otherwise the second, this probably needs to be ironed out later. 
+

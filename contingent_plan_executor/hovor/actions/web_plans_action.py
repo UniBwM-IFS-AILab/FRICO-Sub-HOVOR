@@ -14,7 +14,7 @@ class WebPlansAction(ActionBase):
         self.url = self.config["call"]["endpoint"]
         field_values = self.context._fields
         self.post_payload = dict(self.config["call"]["default_payload"])
-        with open ("/home/qnc/upf-hierarchical/state_variables_dump/dump.json", "w") as f:
+        with open ("dump.json", "w") as f:
 
             json.dump(field_values,f)
         #self.post_payload.update({"field_values": field_values})
