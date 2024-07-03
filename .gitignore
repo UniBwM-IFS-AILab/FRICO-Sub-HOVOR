@@ -10,3 +10,5 @@ output_*.gv*
 output_stats.json
 beam_search_output
 sample_conversations/
+hovor_server_request.ipynb
+contingent_plan_executor.zip
