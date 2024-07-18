@@ -2,7 +2,7 @@ from hovor.outcome_determiners.outcome_determiner_base import OutcomeDeterminerB
 import random
 
 class CustomeOutcomeDeterminer(OutcomeDeterminerBase): 
-    
+    # Ignore this, use api_outcome_determiner
     
     def rank_groups(self, outcome_groups, progress): 
         

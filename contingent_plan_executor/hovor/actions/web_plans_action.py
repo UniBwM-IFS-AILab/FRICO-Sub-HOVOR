@@ -6,7 +6,12 @@ from hovor import DEBUG
 
 
 class WebPlansAction(ActionBase):
-    """Web (i.e., REST API) type of action."""
+    """Web (i.e., REST API) type of action.
+    This is a stripped down version of the web_actions action type
+    I did this mainly for debugging, because I was not able to talk to 
+    hierarchial planner for some reason. You probably do not need this. 
+    
+    """
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -39,7 +44,7 @@ class WebPlansAction(ActionBase):
             
             data = json.loads(r.text)
             # print(data)
-            self._utterance = data
+            self._utterance = data.success
             action_result.set_field("suceeded", True)
             action_result.set_field("type", "message")
             action_result.set_field("msg", self._utterance)
