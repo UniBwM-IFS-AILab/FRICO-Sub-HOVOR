@@ -113,9 +113,11 @@ If you want to make your own outcome determiner, start by looking at the [`Defau
 
 # What is different from the main branch: 
 
+For more details look into README-Mods.md file. 
 
-1. I created a web_plan action type  which has the associated files api_outcome_determiner.py and web_plans_actions 
 
+Essentially there are two different important modification: 
 
-If the api is reachable, we take the first action from the outcome list, otherwise the second, this probably needs to be ironed out later. 
+  1. Addition of `web_plans_actions.py` which calls the `FastAPI` server, serving the plans from HTN planning
+  2. Addition of corresponding `api_outcome_determiner.py` file. This is the outcome determiner for `web_plans_action` action type. 
 
